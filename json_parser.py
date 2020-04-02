@@ -115,14 +115,125 @@ class nextstrain_analysis(nextstrain_output):
     """
     nextstrain_analysis is the child class of nextstrain_output, inheriting all
     of the parsing functions. The analysis methods can take full advantage of
-    the parsing methods in the base class to perform objectives. 
-
-    INPUT: 
-
-    OUTPUT: 
+    the parsing methods in the base class to perform objectives.
     """
-    
-    pass
+
+    # function that returns the counts of each mutation type
+    def mutation_counter(self):
+        """
+        The goal of this function is to find the mutations that occur the most
+        often by couting occurances.
+        """
+        None
+
+    # function that returns location, time, type of mutation
+        ## plot each mutation type that occurs more than twice
+            # as count over time. 
+        ## based on location, what mutations are seen the most often (top 5)
+    def join_mutLocTime(self):
+        """
+        This function joins all of the data for aa mutations together.
+
+        INPUT:
+
+        OUTPUT:
+        """
+        None
+
+    ## timecourse plotter - plot mutation over time
+    def timecourse_array(self, mutation, location, join_mutLocTime_OUT): 
+        """
+        This function returns an array for an input mutation in the number of 
+        mutations over time, for a particular location
+        """
+        None
+
+    ## create protein sequence using mutations
+    def strain_aa_creater(self, prot_sequence, mut_array):
+        """
+        This function takes in the reference protein sequence (string), and the
+        identified amino acid changes (array). It uses this information to
+        create a protein with the substitutions inside the array. 
+
+        NOTE: may need to look for deletions too
+
+        INPUT: strain_creater("YWSAGCTYTAYCTTCG", ['Y1A', 'S3G'])
+
+        OUTPUT: "AWGAGCTYTAYCTTCG"
+        """
+        None 
+
+    ## create genome sequence using mutations
+    def strain_nt_creater(self, prot_sequence, mut_array):
+        """
+        This function takes in the reference genome sequence (string), and the
+        identified nucleotide changes (array). It uses this information to
+        create a genome with the substitutions inside the array. 
+
+        NOTE: may need to look for deletions too
+
+        INPUT: strain_creater("ATACTAGCTATCG", ['A1T', 'A3G'])
+
+        OUTPUT: "TTGCTAGCTATCG"
+        """
+        None 
+
+    ## think about cooccurance here.
+        # how many snps happen at the same time?
+    def find_cooccurance(self):
+        """
+        empty now -- but plot cooccurances. Mabye use some graph theory to try
+        and find mutations that may be commonly cooccuring in order to identify
+        what has been made, AND what has the potential to be made (on the
+        protein level)
+
+        INPUT: 
+
+        OUTPUT: 
+        """
+        None
+
+    # function that returns a table of mutations that happened independently
+       # for both protein and nucleotides
+        # different cities, near the same time? 
+    def indiMut(self):
+        """
+        The goal of this function is to find mutations that are suspected to
+        have happened independently. The idea here is that these meet a set of
+        rules (defined in this function), and if they meet these rules they were
+        thought to be independently occuring mutations. 
+
+        INPUT: self
+        OUTPUT: {"G26A" : {"init_country" : [],
+                           "init_time:" : [],
+                           "counts" : []
+                          }
+        """
+        None
+
+    # based on counts, returns ordered protein sequences
+    # mabye use a baysian model here?
+    def most_common_muts():
+        """
+        The purpose for this method is to find the mutations that occur the most
+        often for each protein. Therefore returning a nested dictionary with a
+        key for each protein, and two sub dictionaries: "counts" and "muts".
+        The "counts" dictionary contains (mutID : count) and muts contains 
+        (mutID : [mut1, mut2, ...,  mutN]).
+
+        NOTE: mutID is randomly assigned int
+
+        INPUT: self
+
+        OUPUT: {prot1 : {"counts" : {mutID : count, ...},
+                         "mut" : {mutID : [mut1, mut2, ...,  mutN], ...}
+                        },
+                prot2 : {},
+                ...,
+                protN : {}
+               }
+        """
+        None
 
 # main function that controls analysis. 
 def main():
@@ -136,3 +247,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
