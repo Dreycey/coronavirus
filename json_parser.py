@@ -155,8 +155,8 @@ class nextstrain_analysis(nextstrain_output):
                                 mut_dict[protein][mutation] += 1
         for protein in mut_dict.keys():
             mut_temp = mut_dict[protein]
-            mut_temp = {k: v for k, v in sorted(mut_temp.items(), 
-                                                reverse=True, 
+            mut_temp = {k: v for k, v in sorted(mut_temp.items(),
+                                                reverse=True,
                                                 key=lambda item: item[1])}
             mut_dict[protein] = mut_temp
         return mut_dict
@@ -218,10 +218,17 @@ class nextstrain_analysis(nextstrain_output):
 
         OUTPUT: "AWGAGCTYTAYCTTCG"
         """
-        None 
+        prot_sequence = list(prot_sequence)
+        for mutation in mut_array:
+            old_aa, location, new_aa = mutation[0], int(mutation[1:-1]), mutation[-1]
+            prot_sequence = list(prot_sequence[:location] +
+                                 [' >',new_aa,'< '] +
+                                 prot_sequence[location+1:])
+        print(''.join(prot_sequence))
+
 
     ## create genome sequence using mutations
-    def strain_nt_creater(self, prot_sequence, mut_array):
+    def strain_nt_creater(self, genome_sequence, mut_array):
         """
         This function takes in the reference genome sequence (string), and the
         identified nucleotide changes (array). It uses this information to
@@ -233,7 +240,13 @@ class nextstrain_analysis(nextstrain_output):
 
         OUTPUT: "TTGCTAGCTATCG"
         """
-        None 
+        genome_sequence = list(genome_sequence)
+        for mutation in mut_array:
+            old_nt, location, new_nt = mutation[0], int(mutation[1:-1]), mutation[-1]
+            genome_sequence = list(genome_sequence[:location] +
+                                 [new_nt] +
+                                 genome_sequence[location+1:])
+        print(''.join(genome_sequence))
 
     ## think about cooccurance here.
         # how many snps happen at the same time?
@@ -262,7 +275,7 @@ class nextstrain_analysis(nextstrain_output):
 
         INPUT: self
         OUTPUT: {"G26A" : {"init_country" : [],
-                           "init_time:" : [],
+                           "ini t_time:" : [],
                            "counts" : []
                           }
         """
@@ -300,9 +313,10 @@ def main():
 
     output_obj = nextstrain_analysis(nextstrain_input)
     output_obj.sanity_check()
-    print(output_obj.join_mutLocTime())
+    E = "MYSFVSEETGTLIVNSVLLFLAFVVFLLVTLAILTALRLCAYCCNIVNVSLVKPSFYVYSRVKNLNSSRVPDLLV*"
+    #print(output_obj.join_mutLocTime())
 
-
+    print(output_obj.strain_nt_creater(E, ["L73F"]))
     print("end main()")
 
 if __name__ == '__main__':
