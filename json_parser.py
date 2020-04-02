@@ -35,7 +35,7 @@ class nextstrain_output():
         print("it's working. nice.")
 
     # parsing the JSON containing information on the location.
-    def parsing_area_json(self):
+    def parsing_branch_json(self):
         """
         This function will parse the JSON containing information on the location
         for the different sequences in the nextflow output. 
@@ -72,7 +72,8 @@ class nextstrain_output():
         INPUT: self
 
         OUTPUT:
-            { 'reference': 'ATGTC..TACGTC',  seq_name_2: ['A153G', ...,'A13C'], ...}
+            { 'reference': 'ATGTC..TACGTC',  i
+               seq_name_2: ['A153G', ...,'A13C'], ...}
         """
         ntMut_location = os.path.join(self.directory, 'nt_muts.json')
         json_data = json.loads(open(ntMut_location).read())
@@ -82,7 +83,7 @@ class nextstrain_output():
             seq_name = seq_id
             seq_mutations = sequences_nodes[seq_id]["muts"]
             parsing_nt_dict[seq_name] = seq_mutations
-        return json_data
+        return parsing_nt_dict
 
     # parsing information on the mutations present in the proteins.
     def parsing_aa_mutations(self):
@@ -106,9 +107,10 @@ class nextstrain_output():
                           "annotations" : json_data["annotations"]}
         sequences_nodes = json_data["nodes"]
         for seq_id in sequences_nodes.keys():
-            mutation_dict = {k : v for k, v in
-                             sequences_nodes[seq_id]["aa_muts"].items()}
-            parsing_aa_dict[seq_id] = mutation_dict
+            if "NODE" not in seq_id:  
+                mutation_dict = {k : v for k, v in
+                                 sequences_nodes[seq_id]["aa_muts"].items()}
+                parsing_aa_dict[seq_id] = mutation_dict
         return parsing_aa_dict
 
 class nextstrain_analysis(nextstrain_output):
@@ -123,8 +125,41 @@ class nextstrain_analysis(nextstrain_output):
         """
         The goal of this function is to find the mutations that occur the most
         often by couting occurances.
+
+        INPUT: self
+
+        OUTPUT: {prot1: { mut1 : count,
+                          mut2 : count
+                        },
+                 prot2: { mut1 : count,
+                          mut2 : count
+                        }
         """
-        None
+        aa_mut_dict = self.parsing_aa_mutations()
+        mut_dict = {}
+        unused_1 = ['M', 'L', 'Q', 'S', 'C', 'Y', 'N', 'F', 'K', 'E', 'H', 'A', 
+                    'T', 'G', 'V', 'P', 'I', 'W', 'D','R']
+        unused_2 = ['*', 'end', 'seqid', 'start', 'strand', 'type']
+        for strain in aa_mut_dict.keys():
+            if strain not in ["reference", "annotations"]:
+                for protein in aa_mut_dict[strain].keys():
+                    if protein not in mut_dict:
+                        mut_dict[protein] = {}
+                    else:
+                        None
+                    for mutation in aa_mut_dict[strain][protein]:
+                        if mutation not in list(unused_1 + unused_2):
+                            if mutation not in mut_dict[protein]:
+                                mut_dict[protein][mutation] = 1
+                            else:
+                                mut_dict[protein][mutation] += 1
+        for protein in mut_dict.keys():
+            mut_temp = mut_dict[protein]
+            mut_temp = {k: v for k, v in sorted(mut_temp.items(), 
+                                                reverse=True, 
+                                                key=lambda item: item[1])}
+            mut_dict[protein] = mut_temp
+        return mut_dict
 
     # function that returns location, time, type of mutation
         ## plot each mutation type that occurs more than twice
@@ -134,11 +169,33 @@ class nextstrain_analysis(nextstrain_output):
         """
         This function joins all of the data for aa mutations together.
 
-        INPUT:
+        INPUT: self
 
         OUTPUT:
+            dict{
+                 sequenceID : [{'E': [], 'M': []},
+                               [ntmutations],
+                               'time',
+                               'datetime',
+                              ]
+                }
         """
-        None
+        aa_mut_dict = self.parsing_aa_mutations()
+        nt_mut_dict = self.parsing_nt_mutations()
+        time_dict = self.parsing_branch_json()
+        unacceptable_list = ["reference", "annotations"]
+        mutLocTime_dict = {}
+        #print(nt_mut_dict.keys()) 
+        for seqname in aa_mut_dict.keys():
+            if seqname not in unacceptable_list:
+                mutLocTime_dict[seqname] = {
+                                            "aa_muts" : aa_mut_dict[seqname],
+                                            "nt_muts" : nt_mut_dict[seqname],
+                                            "time" : time_dict[seqname]
+                                            }
+        return mutLocTime_dict
+
+
 
     ## timecourse plotter - plot mutation over time
     def timecourse_array(self, mutation, location, join_mutLocTime_OUT): 
@@ -240,9 +297,12 @@ def main():
     # create nextstrain output
     nextstrain_input = sys.argv[1]
     print("in main()")
+
     output_obj = nextstrain_analysis(nextstrain_input)
     output_obj.sanity_check()
-    print(output_obj.parsing_area_json())
+    print(output_obj.join_mutLocTime())
+
+
     print("end main()")
 
 if __name__ == '__main__':
