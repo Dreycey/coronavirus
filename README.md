@@ -14,6 +14,11 @@ times, and/or different locations.
 
 ## Code overview. 
 
+## Make sure to download
+mafft: https://anaconda.org/bioconda/mafft
+iqtree: https://anaconda.org/bioconda/iqtree
+nextstrain: https://github.com/nextstrain/ncov
+paper: https://academic.oup.com/bioinformatics/article/34/23/4121/5001388
 
 
 
