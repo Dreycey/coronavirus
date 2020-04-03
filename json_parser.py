@@ -4,6 +4,7 @@ import sys
 import json
 import os
 ## non-standard
+import numpy as np
 
 """
 This script modifies the input JSON files that output by nextstrain and
@@ -192,7 +193,7 @@ class nextstrain_analysis(nextstrain_output):
                                             "aa_muts" : aa_mut_dict[seqname],
                                             "nt_muts" : nt_mut_dict[seqname],
                                             "time" : time_dict[seqname]
-                                            }
+                                             }
         return mutLocTime_dict
 
 
@@ -279,7 +280,72 @@ class nextstrain_analysis(nextstrain_output):
                            "counts" : []
                           }
         """
-        None
+
+        mutation_dict = self.join_mutLocTime()
+        #aamuts, ntmuts, time 
+        #printthis = [key for key in
+                                #mutation_dict.keys()]
+
+        def indimutations_test(mutation, indimutations_list_in):
+            countries = []
+            times = []
+            #for sample in indimutations_dict_in.keys():
+            for ident in indimutations_list_in:
+                mut = mutation_dict[ident]
+                countries.append(ident.split('/')[0])
+                times.append(mut["time"][0])
+            for inf_1 in range(0,len(countries)):
+                for inf_2 in range(0,len(countries)):
+                    country_temp1 = countries[inf_1]
+                    country_temp2 = countries[inf_2]
+                    time_temp1 = times[inf_1]
+                    time_temp2 = times[inf_2]
+                    if country_temp1 != country_temp2:
+                        if (time_temp1 - time_temp2) < 0.001: #less than one week
+                            print(mutation, countries, times)
+                            return True
+            return False
+
+        ### 1. First find samples that have the same mutation.
+        out_dict = {}
+        for sample in mutation_dict:
+            for protein in mutation_dict[sample]["aa_muts"]:
+                if protein in out_dict.keys():
+                    None
+                else:
+                    out_dict[protein] = {}
+                for mutation in mutation_dict[sample]["aa_muts"][protein]:
+                    if mutation in out_dict[protein].keys():
+                        out_dict[protein][mutation].append(sample)
+                    else:
+                         out_dict[protein][mutation] = [sample]
+        out_dict_2 = {}
+        for proteinid in out_dict.keys():
+            print(proteinid)
+            out_dict_2[proteinid] = {}
+            for mutation, identifiers in out_dict[proteinid].items():
+                if len(identifiers) > 1: #if more than 1 strain with that mutation
+                    answer = indimutations_test(mutation, identifiers)
+                    if answer:
+                        if mutation in out_dict_2[proteinid]:
+                            for indentifier in identifiers:
+                                out_dict_2[proteinid][mutation][indentifier] = \
+                                mutation_dict[indentifier]
+                        else:
+                            out_dict_2[proteinid][mutation] = {}
+                            for indentifier in identifiers:
+                                out_dict_2[proteinid][mutation][indentifier] = \
+                                mutation_dict[indentifier]
+
+        ### 2. Pass inner dictionary to a truth function, return true if
+        ###    it passes the independent event test
+        ###    INPUT: 2 different events.
+
+        ### 3. For each true event, save information into a data structure. This
+        ###    is best represented by mutation, then sub information. Perhaps a
+        ###    dictionary with mutation keys, and 
+        #print(mutation_dict)
+        return out_dict_2
 
     # based on counts, returns ordered protein sequences
     # mabye use a baysian model here?
@@ -316,8 +382,10 @@ def main():
     E = "MYSFVSEETGTLIVNSVLLFLAFVVFLLVTLAILTALRLCAYCCNIVNVSLVKPSFYVYSRVKNLNSSRVPDLLV*"
     #print(output_obj.join_mutLocTime())
 
-    print(output_obj.strain_nt_creater(E, ["L73F"]))
-    print("end main()")
+    #print(output_obj.strain_nt_creater(E, ["L73F"]))
+    #print("end main()")
+
+    output_obj.indiMut()
 
 if __name__ == '__main__':
     main()

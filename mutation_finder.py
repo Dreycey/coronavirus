@@ -77,7 +77,7 @@ def dynamic_bar_plot(input_array):
         axs[row_temp, col_temp].set_title(sp_name)
         axs[row_temp, col_temp].tick_params(axis='x', labelrotation=90)
         counter += 1
-    fig.suptitle('Mutational frequencies for each COVID-19 gene', size=20)
+    fig.suptitle('Mutational counts for each COVID-19 gene', size=20)
     fig.subplots_adjust(hspace=0.5, wspace=0.5)
     fig.savefig(output_fig_name, dpi=300, facecolor='w', edgecolor='b',
         orientation='portrait', papertype=None, format=None,
